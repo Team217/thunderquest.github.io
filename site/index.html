@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThunderQuest 2026 Rankings</title>
+<style>
+/* Palette from the official BIOGLOW style guide */
+:root{
+  --light-green:#C6DE94; --green:#70A334; --yellow:#F0E973; --black:#000000;
+  --dark-green:#2C5535; --teal:#22D8C2; --purple:#D59CD6;
+  --font:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);color:#fff;min-height:100vh;overflow-x:hidden;
+  background:radial-gradient(800px 500px at 10% -5%,rgba(34,216,194,.35),transparent 60%),
+             radial-gradient(700px 500px at 100% 10%,rgba(213,156,214,.30),transparent 60%),
+             radial-gradient(700px 500px at 50% 110%,rgba(240,233,115,.18),transparent 60%),
+             linear-gradient(180deg,var(--dark-green),#1b3a23 60%,var(--black));background-attachment:fixed}
+/* floating glow orbs */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0}
+.orbs i{position:absolute;bottom:-60px;border-radius:50%;opacity:.55;filter:blur(1px);animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-115vh) translateX(30px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.orbs{display:none}}
+header,main,footer{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding-left:16px;padding-right:16px}
+header{padding-top:24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+#logo{width:min(260px,60vw);height:auto;min-width:72px}
+h1{margin:0;font-size:clamp(1.6rem,5vw,2.6rem);line-height:1.1;color:var(--yellow);
+  text-shadow:0 0 6px var(--teal),0 0 22px var(--teal),3px 3px 0 var(--black)}
+.sub{margin:6px 0 0;color:var(--light-green);font-size:1.05rem}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0}
+input[type=search]{flex:1 1 220px;padding:13px 18px;border-radius:999px;border:3px solid var(--green);background:var(--black);color:#fff;font:inherit}
+input[type=search]:focus{outline:none;border-color:var(--teal);box-shadow:0 0 16px var(--teal)}
+.seg{display:inline-flex;border:3px solid var(--green);border-radius:999px;overflow:hidden;background:var(--black)}
+.seg button{background:transparent;border:0;color:var(--light-green);padding:11px 16px;font:inherit;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--yellow);color:var(--black)}
+#list{display:grid;gap:12px}
+.card{display:grid;grid-template-columns:auto 1fr auto;gap:6px 14px;align-items:center;padding:12px 16px;border-radius:22px;
+  background:var(--light-green);color:var(--dark-green);border:4px solid var(--green);box-shadow:0 5px 0 var(--black);transition:transform .15s}
+.card:hover{transform:translateY(-2px) rotate(-.3deg)}
+.card.c1{border-color:var(--yellow);box-shadow:0 5px 0 var(--black),0 0 24px var(--yellow)}
+.card.c2{border-color:var(--teal);box-shadow:0 5px 0 var(--black),0 0 24px var(--teal)}
+.card.c3{border-color:var(--purple);box-shadow:0 5px 0 var(--black),0 0 24px var(--purple)}
+.rank{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;font-size:1.4rem;background:var(--dark-green);color:var(--light-green);border:3px solid var(--black)}
+.c1 .rank{background:var(--yellow);color:var(--black)}
+.c2 .rank{background:var(--teal);color:var(--black)}
+.c3 .rank{background:var(--purple);color:var(--black)}
+.who{min-width:0}
+.name{font-size:1.15rem;color:var(--black);overflow-wrap:anywhere}
+.chip .short{display:none}
+.tn{display:inline-block;margin-right:8px;padding:1px 10px;border-radius:999px;background:var(--dark-green);color:var(--light-green);font-size:.85rem;vertical-align:middle}
+.best{text-align:center;background:var(--black);color:var(--yellow);border-radius:16px;padding:6px 14px;min-width:84px;box-shadow:0 0 14px rgba(240,233,115,.55)}
+.best small{display:block;font-size:.62rem;letter-spacing:.08em;color:var(--teal)}
+.best b{font-size:1.7rem;font-variant-numeric:tabular-nums}
+.rounds{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.chip{flex:1 1 70px;text-align:center;padding:5px 8px;border-radius:12px;background:var(--dark-green);color:#fff;font-size:.95rem;font-variant-numeric:tabular-nums}
+.chip small{display:block;font-size:.62rem;color:var(--light-green);letter-spacing:.06em}
+.chip.top{background:var(--teal);color:var(--black)}
+.chip.top small{color:var(--dark-green)}
+.chip.empty{background:transparent;border:2px dashed var(--green);color:var(--green)}
+.chip.empty small{color:var(--green)}
+.list{gap:8px}
+.list .card{grid-template-columns:auto 1fr auto auto;padding:6px 12px;border-width:3px;border-radius:16px;box-shadow:0 3px 0 var(--black)}
+.list .card.c1{box-shadow:0 3px 0 var(--black),0 0 16px var(--yellow)}
+.list .card.c2{box-shadow:0 3px 0 var(--black),0 0 16px var(--teal)}
+.list .card.c3{box-shadow:0 3px 0 var(--black),0 0 16px var(--purple)}
+.list .rank{width:38px;height:38px;font-size:1.05rem}
+.list .name{font-size:1rem}
+.list .rounds{grid-column:auto;order:3;flex-wrap:nowrap;gap:5px}
+.list .best{order:4;min-width:60px;padding:2px 10px;border-radius:12px}
+.list .best small{display:none}
+.list .best b{font-size:1.25rem}
+.list .chip{flex:0 0 auto;min-width:46px;padding:3px 6px;font-size:.85rem}
+.list .chip .long{display:none}
+.list .chip .short{display:inline}
+@media (max-width:640px){.list .rounds{grid-column:1/-1;order:5}.list .chip{flex:1 1 0}}
+.meta{color:var(--light-green);margin:16px 0 8px;text-align:center}
+.none{text-align:center;padding:30px;color:var(--yellow);font-size:1.2rem}
+footer{padding-bottom:30px;color:rgba(198,222,148,.8);font-size:.72rem;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="orbs" id="orbs" aria-hidden="true"></div>
+<header>
+  <img id="logo" src="assets/bioglow-logo.png" alt="BIOGLOW" onerror="this.remove()">
+  <div>
+    <h1>ThunderQuest 2026 Rankings</h1>
+    <p class="sub">Ranked by each team's highest score · Last updated <span id="upd">…</span></p>
+  </div>
+</header>
+<main>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Find your team (name or number)" aria-label="Search teams">
+    <div class="seg" role="group" aria-label="Sort">
+      <button id="s-rank" aria-pressed="true">By rank</button>
+      <button id="s-num" aria-pressed="false">By team #</button>
+    </div>
+    <div class="seg" role="group" aria-label="View">
+      <button id="v-cards" aria-pressed="true">Cards</button>
+      <button id="v-list" aria-pressed="false">List</button>
+    </div>
+  </div>
+  <div id="list"></div>
+  <div class="meta" id="meta"></div>
+</main>
+<footer>
+  FIRST® is a trademark of For Inspiration and Recognition of Science and Technology (FIRST). LEGO® is a registered trademark of the LEGO Group. FIRST® LEGO® League and BIOGLOW™ are jointly held trademarks of FIRST and the LEGO Group. ©2026 FIRST and the LEGO Group. All rights reserved.
+</footer>
+<script>
+let data = /*__DATA__*/null, sort = "rank", view = "cards";
+try { view = localStorage.getItem("view") === "list" ? "list" : "cards"; } catch (e) {}
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// decorative glow orbs in palette colors
+$("orbs").innerHTML = ["#22D8C2","#D59CD6","#F0E973","#C6DE94","#70A334"].flatMap((c, k) =>
+  [0, 1, 2].map(j => { const s = 10 + ((k * 7 + j * 11) % 22);
+    return `<i style="left:${(k * 20 + j * 7 + 4) % 98}%;width:${s}px;height:${s}px;background:${c};box-shadow:0 0 ${s * 2}px ${c};animation-duration:${14 + (k * 3 + j * 5) % 14}s;animation-delay:${-(k * 4 + j * 6)}s"></i>`; })).join("");
+
+function render() {
+  if (!data) return;
+  const q = $("q").value.trim().toLowerCase();
+  const rows = data.teams.filter(t => !q || String(t.num).includes(q) || t.name.toLowerCase().includes(q));
+  rows.sort(sort === "num" ? (a, b) => a.num - b.num
+    : (a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9) || a.num - b.num);
+
+  $("list").className = view === "list" ? "list" : "";
+  $("v-cards").setAttribute("aria-pressed", view === "cards");
+  $("v-list").setAttribute("aria-pressed", view === "list");
+  $("list").innerHTML = rows.map(t => {
+    const chips = t.rounds.map((v, i) => {
+      const cls = v == null ? "empty" : (t.best != null && v === t.best ? "top" : "");
+      return `<div class="chip ${cls}"><small><span class="long">ROUND </span><span class="short">R</span>${i + 1}</small>${v == null ? "–" : (cls === "top" ? "⭐ " : "") + v}</div>`;
+    }).join("");
+    return `<div class="card ${t.rank && t.rank <= 3 ? "c" + t.rank : ""}">
+      <div class="rank">${t.rank ?? "–"}</div>
+      <div class="who"><div class="name"><span class="tn">${t.num}</span>${esc(t.name)}</div></div>
+      <div class="best"><small>BEST</small><b>${t.best != null ? t.best : "–"}</b></div>
+      <div class="rounds">${chips}</div></div>`;
+  }).join("") || `<div class="none">No teams match 🔍</div>`;
+
+  const u = new Date(data.updated);
+  $("upd").textContent = u.toLocaleString([], {dateStyle:"medium", timeStyle:"short"});
+  $("meta").textContent = `${data.teams.length} teams`;
+}
+
+async function poll() {
+  try {
+    const r = await fetch("data.json?t=" + Date.now(), {cache: "no-store"});
+    const d = await r.json();
+    if (!data || d.updated !== data.updated) { data = d; render(); }
+  } catch (e) { /* offline: keep showing last data */ }
+}
+
+$("q").oninput = render;
+for (const [id, k] of [["s-rank","rank"],["s-num","num"]])
+  $(id).onclick = () => { sort = k; $("s-rank").setAttribute("aria-pressed", k==="rank"); $("s-num").setAttribute("aria-pressed", k==="num"); render(); };
+for (const [id, v] of [["v-cards","cards"],["v-list","list"]])
+  $(id).onclick = () => { view = v; try { localStorage.setItem("view", v); } catch (e) {} render(); };
+render(); setInterval(poll, 30000);
+</script>
+</body>
+</html>
