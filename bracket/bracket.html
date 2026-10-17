@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThunderQuest 2026 Bracket</title>
+<style>
+/* Palette from the official BIOGLOW style guide. Fully offline: no external files needed. */
+:root{
+  --light-green:#C6DE94; --green:#70A334; --yellow:#F0E973; --black:#000;
+  --dark-green:#2C5535; --teal:#22D8C2; --purple:#D59CD6;
+  --font:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:#fff;overflow:hidden;display:flex;flex-direction:column;
+  background:radial-gradient(900px 500px at 12% 0%,rgba(34,216,194,.28),transparent 60%),
+             radial-gradient(800px 500px at 92% 8%,rgba(213,156,214,.24),transparent 60%),
+             linear-gradient(180deg,#0e2a19,#0a1a10 60%,#000)}
+#forest{position:fixed;left:0;right:0;bottom:0;width:100%;height:46vh;z-index:0;pointer-events:none}
+#amb{position:fixed;inset:0;z-index:0;pointer-events:none}
+#amb i{position:absolute;border-radius:50%;animation:drift ease-in-out infinite alternate,tw 3s ease-in-out infinite}
+@keyframes drift{to{transform:translate(40px,-60px)}}
+@keyframes tw{50%{opacity:.25}}
+.sh{filter:drop-shadow(0 0 7px currentColor);animation:sg 3.4s ease-in-out infinite}
+@keyframes sg{50%{opacity:.55}}
+header{position:relative;z-index:2;display:flex;align-items:center;gap:16px;padding:10px 18px;flex-wrap:wrap}
+#logo{height:52px;width:auto;min-width:72px}
+h1{margin:0;font-size:clamp(1.3rem,3vw,2.1rem);color:var(--yellow);text-shadow:0 0 6px var(--teal),0 0 20px var(--teal),2px 2px 0 #000}
+.ctl{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;cursor:pointer;padding:10px 16px;border-radius:999px;border:3px solid var(--green);background:#000;color:var(--light-green)}
+.btn:hover:not(:disabled){border-color:var(--teal);box-shadow:0 0 12px var(--teal)}
+.btn.pri{background:var(--yellow);color:#000;border-color:#000;box-shadow:0 0 14px rgba(240,233,115,.6)}
+.btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+body.present .ctl,body.present .hint{display:none}
+.hint{position:fixed;right:14px;bottom:8px;z-index:3;font-size:.7rem;color:rgba(198,222,148,.8)}
+#stage{position:relative;z-index:1;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px 12px 30px}
+#fit{position:relative}
+#bracket{position:absolute;left:0;top:0;width:max-content;transform-origin:0 0}
+#vines{position:absolute;left:0;top:0;pointer-events:none;z-index:0;overflow:visible}
+.vine{fill:none;stroke:rgba(112,163,52,.5);stroke-width:3;stroke-linecap:round;transition:stroke .6s,filter .6s}
+.vine.lit{stroke:var(--teal);filter:drop-shadow(0 0 6px var(--teal))}
+.cols{position:relative;z-index:1;display:flex;gap:60px;align-items:stretch}
+.col{display:flex;flex-direction:column;min-width:230px}
+.ch{text-align:center;font-size:1.05rem;padding:4px 0 10px;color:var(--light-green);letter-spacing:.04em}
+.col.active .ch{color:var(--yellow);text-shadow:0 0 14px var(--yellow)}
+.ms{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:14px}
+.m{background:rgba(0,14,6,.78);border:3px solid var(--green);border-radius:16px;overflow:hidden;box-shadow:0 4px 0 #000}
+.m.champ .num{font-size:2.2rem}
+.m.champ .nm{font-size:1rem;max-width:170px}
+.m.champ{border-color:var(--yellow);box-shadow:0 4px 0 #000,0 0 26px rgba(240,233,115,.4)}
+.t{display:flex;align-items:center;gap:10px;padding:8px 12px;min-height:50px;position:relative;transition:opacity .8s,background .3s}
+.t+.t{border-top:2px solid rgba(198,222,148,.22)}
+.num{font-size:1.4rem;color:var(--yellow);min-width:3.5ch;text-align:center;font-variant-numeric:tabular-nums}
+.nm{font-size:.8rem;color:var(--light-green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.t.hid .num{color:rgba(198,222,148,.4)}
+.t.hid::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:bud 2.2s ease-in-out infinite}
+@keyframes bud{50%{transform:scale(.55);opacity:.45}}
+.t.bye .num,.t.bye .nm{color:rgba(198,222,148,.35)}
+.t.shown .num{text-shadow:0 0 10px rgba(34,216,194,.6)}
+.t.arr .num,.t.arr .nm{opacity:0}
+.t.lit .num,.t.lit .nm{animation:bloom 1.5s ease-out both}
+.t.lit{animation:ring 1.6s ease-out}
+@keyframes bloom{0%{opacity:0;filter:blur(10px);transform:scale(.5)}45%{opacity:1;filter:blur(0);transform:scale(1.35);text-shadow:0 0 22px var(--teal),0 0 46px var(--purple)}100%{opacity:1;transform:scale(1)}}
+@keyframes ring{0%{background:rgba(34,216,194,.6)}100%{background:transparent}}
+.t.out{opacity:.38}
+body:not(.present) .t.can{cursor:pointer}
+body:not(.present) .t.can:hover{background:rgba(34,216,194,.16)}
+body:not(.present) .t.pick{background:rgba(112,163,52,.35)}
+body:not(.present) .t.pick::after{content:"✓";margin-left:auto;color:var(--yellow)}
+#fx{position:fixed;inset:0;z-index:50;pointer-events:none}
+#banner{position:fixed;left:0;right:0;top:9%;text-align:center;z-index:60;pointer-events:none;opacity:0;
+  font-size:clamp(1.8rem,6vw,4rem);color:var(--yellow);text-shadow:0 0 10px var(--teal),0 0 40px var(--teal),0 0 70px var(--purple),4px 4px 0 #000}
+#banner.on{animation:ban 2.6s ease-out}
+@keyframes ban{0%{opacity:0;transform:scale(.7);filter:blur(12px)}20%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1}100%{opacity:0;transform:scale(1.12)}}
+dialog{background:#10261a;color:#fff;border:3px solid var(--green);border-radius:20px;padding:20px;width:min(560px,92vw);font-family:var(--font)}
+dialog::backdrop{background:rgba(0,0,0,.72)}
+dialog h2{margin:0 0 8px;color:var(--yellow)}
+dialog p{margin:6px 0;color:var(--light-green);font-size:.9rem}
+input[type=number],input[type=file]{font:inherit;background:#000;color:#fff;border:3px solid var(--green);border-radius:12px;padding:8px;max-width:100%}
+.pull{border:2px dashed var(--green);border-radius:14px;padding:10px 12px;margin:10px 0}
+.pull p{margin:2px 0 8px}
+textarea,select{width:100%;font:inherit;background:#000;color:#fff;border:3px solid var(--green);border-radius:12px;padding:10px}
+textarea{height:210px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+#err{color:var(--yellow);font-size:.9rem}
+.legal{position:fixed;left:12px;bottom:6px;z-index:3;font-size:.6rem;color:rgba(198,222,148,.6);max-width:60vw}
+@media (prefers-reduced-motion:reduce){#amb,.sh,.t.hid::before{animation:none}}
+</style>
+</head>
+<body>
+<svg id="forest" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+<div id="amb" aria-hidden="true"></div>
+<header>
+  <img id="logo" src="bioglow-logo.png" alt="BIOGLOW" onerror="this.remove()">
+  <h1>ThunderQuest 2026 Bracket</h1>
+  <div class="ctl">
+    <button class="btn" id="setupBtn">Setup</button>
+    <button class="btn" id="undo">↩ Undo reveal</button>
+    <button class="btn pri" id="reveal">Reveal</button>
+    <button class="btn" id="presentBtn">Present</button>
+  </div>
+</header>
+<div id="stage"><div id="fit"><div id="bracket"><svg id="vines"></svg><div class="cols" id="cols"></div></div></div></div>
+<canvas id="fx"></canvas>
+<div id="banner"></div>
+<div class="hint">Space = reveal · P = present · F = fullscreen · Esc = exit</div>
+<div class="legal">FIRST® LEGO® League and BIOGLOW™ are jointly held trademarks of FIRST and the LEGO Group. ©2026 FIRST and the LEGO Group. All rights reserved.</div>
+
+<dialog id="setup">
+  <h2>Set up the bracket</h2>
+  <p>One team per line: number, then an optional name. Teams are paired in the order you list them (1st vs 2nd, 3rd vs 4th, and so on).</p>
+  <div class="pull">
+    <p><b>Pull from the scores page:</b> choose the built <code>_site/index.html</code> (or <code>data.json</code>), then how many top teams you want.</p>
+    <div class="row" style="margin-top:0">
+      <input type="file" id="file" accept=".html,.htm,.json">
+      <label>Top <input type="number" id="topx" value="8" min="2" max="32" style="width:74px"></label>
+      <button class="btn" id="fill" disabled>Fill list</button>
+    </div>
+    <p id="src" style="margin:8px 0 0"></p>
+  </div>
+  <textarea id="txt" placeholder="3549 Robotic Ruins&#10;3649 The Gold Miners"></textarea>
+  <div class="row">
+    <label for="size">Bracket size</label>
+    <select id="size" style="width:auto"><option value="auto">Auto</option><option>4</option><option>8</option><option>16</option><option>32</option></select>
+    <label for="pair">Matchups</label>
+    <select id="pair" style="width:auto"><option value="listed">In the order listed</option><option value="seed">Seeded: 1st vs last, 2nd vs next-to-last…</option></select>
+    <span id="err"></span>
+  </div>
+  <p>If you list fewer teams than the bracket size, the empty spots become byes (the team just moves on).</p>
+  <div class="row">
+    <button class="btn" id="sample">Load sample</button>
+    <button class="btn" id="cancel" style="margin-left:auto">Cancel</button>
+    <button class="btn pri" id="go">Start bracket</button>
+  </div>
+</dialog>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const COL = ["#22D8C2","#D59CD6","#F0E973","#C6DE94","#70A334"];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SAMPLE = ["3549 Robotic Ruins","3649 The Gold Miners","16821 Robotic Knighthawks","17791 Artifact Maniacs",
+  "17981 Techno Bananas","22287 Morgan Elementary Sharks","23817 Astro Knighthawks","25341 Techno Tie-Dye Tater Tots"].join("\n");
+let st = null, S = 0, busy = false, opt = {};
+
+/* ---------- scenery (all drawn inline, no images) ---------- */
+function scenery() {
+  let r = 7; const rnd = () => (r = r * 16807 % 2147483647) / 2147483647;
+  let h = `<defs>
+  <symbol id="pine" viewBox="0 0 100 160"><polygon points="50,0 82,52 18,52"/><polygon points="50,28 90,92 10,92"/><polygon points="50,62 98,130 2,130"/><rect x="44" y="128" width="12" height="32"/></symbol>
+  <symbol id="oak" viewBox="0 0 120 160"><rect x="52" y="80" width="16" height="80"/><circle cx="60" cy="52" r="40"/><circle cx="30" cy="72" r="26"/><circle cx="90" cy="72" r="26"/></symbol>
+  <symbol id="shroom" viewBox="0 0 60 60"><rect x="25" y="30" width="10" height="28" rx="4" fill="#C6DE94" opacity=".9"/><path d="M4 32C4 8 56 8 56 32Z" fill="currentColor"/><circle cx="20" cy="23" r="4" fill="#000" opacity=".25"/><circle cx="38" cy="19" r="3" fill="#000" opacity=".25"/></symbol></defs>`;
+  const tree = (fill, n, hMin, hMax) => { for (let i = 0; i < n; i++) {
+    const ht = hMin + rnd() * (hMax - hMin), w = ht * (.55 + rnd() * .2), x = rnd() * 1600 - w / 2, pine = rnd() < .6;
+    h += `<use href="#${pine ? "pine" : "oak"}" x="${x.toFixed(0)}" y="${(400 - ht).toFixed(0)}" width="${w.toFixed(0)}" height="${ht.toFixed(0)}" fill="${fill}"/>`; } };
+  tree("#12301c", 20, 170, 300); tree("#0a1f12", 16, 130, 230);
+  h += `<rect y="392" width="1600" height="30" fill="#000"/>`;
+  tree("#000", 8, 150, 260);
+  for (let i = 0; i < 26; i++) { const s = 22 + rnd() * 26, x = rnd() * 1560;
+    h += `<use class="sh" href="#shroom" x="${x.toFixed(0)}" y="${(398 - s).toFixed(0)}" width="${s.toFixed(0)}" height="${s.toFixed(0)}" style="color:${COL[i % 3]};animation-delay:${(rnd() * 3).toFixed(1)}s"/>`; }
+  $("forest").innerHTML = h;
+  let a = ""; for (let i = 0; i < 16; i++) { const s = 3 + rnd() * 4, c = COL[i % 5];
+    a += `<i style="left:${(rnd() * 100).toFixed(0)}%;top:${(rnd() * 100).toFixed(0)}%;width:${s}px;height:${s}px;background:${c};box-shadow:0 0 ${s * 3}px ${c};animation-duration:${(6 + rnd() * 8).toFixed(1)}s,${(2 + rnd() * 3).toFixed(1)}s"></i>`; }
+  $("amb").innerHTML = a;
+}
+
+/* ---------- bracket data ---------- */
+const nM = s => st.size >> (s + 1);
+const nameOf = s => { if (s === S) return "Champion"; const left = S - s;
+  return left === 1 ? "Final" : left === 2 ? "Semifinals" : left === 3 ? "Quarterfinals" : "Round of " + 2 ** left; };
+function newState(size, teams) { S = Math.log2(size);
+  st = { size, teams: [...teams, ...Array(size - teams.length).fill(null)],
+         picks: Array.from({ length: S }, (_, s) => Array(size >> (s + 1)).fill(null)), revealed: 0 }; save(); }
+function T(s, m, k) { if (s === 0) return st.teams[2 * m + k];
+  const f = 2 * m + k, w = widx(s - 1, f); return (w === null || w < 0) ? null : T(s - 1, f, w); }
+function widx(s, m) { const a = T(s, m, 0), b = T(s, m, 1);
+  if (!a && !b) return -1; if (!a) return 1; if (!b) return 0; return st.picks[s][m]; }
+const champ = () => { const w = widx(S - 1, 0); return (w === null || w < 0) ? null : T(S - 1, 0, w); };
+const complete = s => { for (let m = 0; m < nM(s); m++) if (widx(s, m) === null) return false; return true; };
+function save() { try { localStorage.setItem("tq-bracket", JSON.stringify(st)); } catch (e) {} }
+function load() { try { const j = JSON.parse(localStorage.getItem("tq-bracket"));
+  if (j && j.size && j.picks && j.teams) { st = j; S = Math.log2(j.size); return true; } } catch (e) {} return false; }
+
+/* ---------- rendering ---------- */
+function render() {
+  const cols = $("cols"); cols.innerHTML = "";
+  const shown = opt.arriving ? st.revealed - 1 : st.revealed;   // stages whose outcomes are visible
+  for (let s = 0; s <= S; s++) {
+    const col = document.createElement("div"); col.className = "col" + (s === st.revealed && s < S ? " active" : "");
+    col.innerHTML = `<div class="ch">${s === S ? "🏆 " : ""}${nameOf(s)}</div><div class="ms"></div>`;
+    const ms = col.querySelector(".ms");
+    for (let m = 0; m < (s === S ? 1 : nM(s)); m++) {
+      const isCh = s === S, card = document.createElement("div"); card.className = "m" + (isCh ? " champ" : ""); card.id = `m-${s}-${m}`;
+      for (let k = 0; k < (isCh ? 1 : 2); k++) card.append(slot(s, m, k, isCh, shown));
+      ms.append(card);
+    }
+    cols.append(col);
+  }
+  layout(); ui();
+}
+function slot(s, m, k, isCh, shown) {
+  const vis = s === 0 || st.revealed >= s, team = isCh ? champ() : T(s, m, k);
+  const el = document.createElement("div"); el.id = `t-${s}-${m}-${k}`;
+  let cls = "t";
+  if (!vis) cls += " hid"; else if (!team) cls += " bye"; else cls += opt.arriving === s ? " arr" : " shown";
+  const active = s === st.revealed && s < S, w = (!isCh && vis) ? widx(s, m) : null;
+  if (active && w === k) cls += " pick";
+  if (active && !isCh && T(s, m, 0) && T(s, m, 1) && !busy) { cls += " can"; el.onclick = () => pick(s, m, k); }
+  if (!isCh && s < shown && w !== null && w >= 0 && w !== k && team) cls += " out";
+  el.className = cls;
+  el.innerHTML = !vis ? `<span class="num">?</span>`
+    : team ? `<span class="num">${esc(team.num)}</span><span class="nm">${esc(team.name)}</span>`
+    : `<span class="num">–</span><span class="nm">${s === 0 ? "BYE" : ""}</span>`;
+  if (s > 0) el.dataset.vine = isCh ? `v-${S - 1}-0` : `v-${s - 1}-${2 * m + k}`;
+  return el;
+}
+function pick(s, m, k) { if (busy || s !== st.revealed) return; st.picks[s][m] = st.picks[s][m] === k ? null : k; save(); render(); }
+function ui() {
+  const s = st.revealed, b = $("reveal");
+  if (s >= S) { b.textContent = "🏆 Bracket complete"; b.disabled = true; }
+  else { let done = 0; for (let m = 0; m < nM(s); m++) if (widx(s, m) !== null) done++;
+    b.textContent = `✨ Reveal ${s + 1 === S ? "the champion" : nameOf(s + 1) + " teams"} (${done}/${nM(s)})`;
+    b.disabled = busy || done < nM(s); }
+  $("undo").disabled = busy || st.revealed === 0;
+}
+
+/* ---------- layout: vines + fit to window ---------- */
+function layout() {
+  const br = $("bracket"), svg = $("vines"); br.style.transform = "none";
+  const w = br.offsetWidth, h = br.offsetHeight, b = br.getBoundingClientRect();
+  svg.setAttribute("width", w); svg.setAttribute("height", h);
+  let p = "";
+  for (let s = 0; s < S; s++) for (let m = 0; m < nM(s); m++) {
+    const a = $(`m-${s}-${m}`), t = $(s + 1 === S ? `t-${S}-0-0` : `t-${s + 1}-${m >> 1}-${m & 1}`); if (!a || !t) continue;
+    const ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect();
+    const x1 = ra.right - b.left, y1 = ra.top + ra.height / 2 - b.top, x2 = rt.left - b.left, y2 = rt.top + rt.height / 2 - b.top, mx = (x1 + x2) / 2;
+    p += `<path id="v-${s}-${m}" class="vine${t.classList.contains("shown") ? " lit" : ""}" d="M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}"/>`;
+  }
+  svg.innerHTML = p;
+  const stg = $("stage"), sc = Math.min(1, (stg.clientWidth - 24) / w, (stg.clientHeight - 38) / h);
+  br.style.transform = `scale(${sc})`; $("fit").style.width = w * sc + "px"; $("fit").style.height = h * sc + "px";
+}
+
+/* ---------- the glow reveal ---------- */
+const cv = $("fx"), cx = cv.getContext("2d"); let ps = [], pend = [], raf = 0, dpr = 1;
+function fitCanvas() { dpr = devicePixelRatio || 1; cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; }
+const R = (a, b) => a + Math.random() * (b - a);
+function dot(x, y, r, c, a) { const g = cx.createRadialGradient(x, y, 0, x, y, r * 6);
+  g.addColorStop(0, "#fff"); g.addColorStop(.18, c); g.addColorStop(1, "rgba(0,0,0,0)");
+  cx.globalAlpha = Math.max(0, a); cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, r * 6, 0, 6.283); cx.fill(); }
+function light(el) { if (el.classList.contains("lit")) return; el.classList.remove("arr"); el.classList.add("lit", "shown");
+  const v = el.dataset.vine && $(el.dataset.vine); if (v) v.classList.add("lit"); }
+function burst(x, y) { for (let i = 0; i < 20; i++) { const a = R(0, 6.283), sp = R(40, 220);
+  pend.push({ k: "sp", x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, col: COL[i % 5], t0: performance.now(), life: R(700, 1200), sz: R(1.5, 3.5) }); } }
+function glow(targets, done) {
+  let fin = false;
+  const finish = () => { if (fin) return; fin = true; cancelAnimationFrame(raf); ps = []; pend = [];
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height); targets.forEach(light); done(); };
+  if (!targets.length || matchMedia("(prefers-reduced-motion: reduce)").matches) { targets.forEach(light); setTimeout(finish, 900); return; }
+  const now = performance.now(), W = innerWidth, H = innerHeight; let end = 0;
+  targets.forEach((el, i) => { const r = el.getBoundingClientRect(), tx = r.left + r.width / 2, ty = r.top + r.height / 2;
+    for (let n = 0; n < 8; n++) { const sd = Math.random(), st0 = now + 500 + i * 200 + R(0, 350), dur = R(1300, 2100), hover = 900;
+      ps.push({ k: "ff", x0: sd < .7 ? R(0, W) : sd < .85 ? -20 : W + 20, y0: sd < .7 ? H + R(0, 40) : R(H * .3, H),
+        tx: tx + R(-r.width * .3, r.width * .3), ty: ty + R(-r.height * .3, r.height * .3), st: st0, dur, hover,
+        col: COL[(i + n) % 5], sz: R(2.2, 4.2), ph: R(0, 6.28), amp: R(20, 70), el, lead: n === 0 });
+      end = Math.max(end, st0 + dur + hover - now); } });
+  const tick = t => {
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H); cx.globalCompositeOperation = "lighter";
+    ps = ps.filter(p => {
+      if (p.k === "sp") { const u = (t - p.t0) / p.life; if (u >= 1) return false, 0; const d = u * p.life / 1000;
+        dot(p.x + p.vx * d * (1 - u * .5), p.y + p.vy * d * (1 - u * .5) + 30 * d * d, p.sz * (1 - u * .5), p.col, 1 - u); return true; }
+      const u = (t - p.st) / p.dur; if (u < 0) return true;
+      if (u < 1) { const e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+        dot(p.x0 + (p.tx - p.x0) * e + Math.sin(u * 9 + p.ph) * p.amp * (1 - u), p.y0 + (p.ty - p.y0) * e + Math.cos(u * 7 + p.ph) * p.amp * .6 * (1 - u),
+            p.sz * (1 + .4 * Math.sin(u * 30 + p.ph)), p.col, 1); return true; }
+      if (!p.lit && p.lead) { p.lit = true; light(p.el); burst(p.tx, p.ty); }
+      const v = (t - p.st - p.dur) / p.hover; if (v >= 1) return false; const a = v * 8 + p.ph;
+      dot(p.tx + Math.cos(a) * 10 * (1 - v), p.ty + Math.sin(a) * 8 * (1 - v), p.sz, p.col, 1 - v); return true; });
+    ps = ps.concat(pend); pend = []; cx.globalAlpha = 1;
+    if (ps.length) raf = requestAnimationFrame(tick); else finish(); };
+  raf = requestAnimationFrame(tick); setTimeout(finish, end + 2500);
+}
+function banner(txt) { const b = $("banner"); b.textContent = txt; b.classList.remove("on"); void b.offsetWidth; b.classList.add("on"); }
+
+/* ---------- actions ---------- */
+function reveal() {
+  if (busy || st.revealed >= S) return; const s = st.revealed; if (!complete(s)) return;
+  busy = true; st.revealed = s + 1; save(); opt = { arriving: s + 1 }; render();
+  banner(s + 1 === S ? "🏆 We have a champion!" : `${nameOf(s + 1)} bound!`);
+  glow([...document.querySelectorAll(".t.arr")], () => { busy = false; opt = {}; render(); });
+}
+function undo() { if (busy || st.revealed === 0) return; st.revealed--;
+  for (let s = st.revealed + 1; s < S; s++) st.picks[s].fill(null); save(); render(); }
+function seedOrder(n) { let o = [1, 2]; while (o.length < n) { const m = o.length * 2; o = o.flatMap(x => [x, m + 1 - x]); } return o; }
+let ranked = null;
+try { ranked = JSON.parse(localStorage.getItem("tq-ranked")); } catch (e) {}
+function srcInfo(extra) { const n = ranked && ranked.teams ? ranked.teams.length : 0;
+  $("fill").disabled = !n;
+  $("src").textContent = n ? `Loaded ${n} ranked teams (scores built ${new Date(ranked.updated).toLocaleString()}). Choose a file again to refresh. ${extra || ""}` : ""; }
+function readScores(txt) { let j = null; const t = txt.trim();
+  try { if (t[0] === "{") j = JSON.parse(t); } catch (e) {}
+  if (!j) { const m = txt.match(/let data = (\{[\s\S]*?\})\s*,\s*sort\s*=/); if (m) { try { j = JSON.parse(m[1]); } catch (e) {} } }
+  return j && Array.isArray(j.teams) ? j : null; }
+$("file").onchange = async e => { const f = e.target.files[0]; if (!f) return;
+  const j = readScores(await f.text());
+  if (!j) { $("src").textContent = "No scores found in that file. Pick the built _site/index.html (run the build first) or data.json."; return; }
+  ranked = { updated: j.updated, teams: j.teams.filter(t => t.rank != null).sort((a, b) => a.rank - b.rank || a.num - b.num) };
+  try { localStorage.setItem("tq-ranked", JSON.stringify(ranked)); } catch (e) {} srcInfo(); };
+$("fill").onclick = () => { const x = Math.max(2, Math.min(32, +$("topx").value || 8)), top = ranked.teams.slice(0, x);
+  $("txt").value = top.map(t => `${t.num} ${t.name}`).join("\n"); $("pair").value = "seed"; $("size").value = "auto"; $("err").textContent = "";
+  const nx = ranked.teams[x], last = top[top.length - 1];
+  srcInfo(nx && last && nx.rank === last.rank ? `Heads up: teams ${last.num} and ${nx.num} are tied at rank ${last.rank}, right at the cutoff.` : ""); };
+function parse(txt) { return txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => {
+  const m = l.match(/^([^\s,;\t]+)[\s,;\t]*(.*)$/); return { num: m[1], name: m[2].replace(/^[-–—:]\s*/, "").trim() }; }); }
+function openSetup() { $("err").textContent = ""; if (!$("txt").value.trim()) $("txt").value = st ? st.teams.filter(Boolean).map(t => `${t.num} ${t.name}`.trim()).join("\n") : SAMPLE; $("setup").showModal(); }
+$("setupBtn").onclick = openSetup; $("cancel").onclick = () => $("setup").close();
+$("sample").onclick = () => { $("txt").value = SAMPLE; };
+$("go").onclick = () => { const teams = parse($("txt").value), sel = $("size").value;
+  if (teams.length < 2) return $("err").textContent = "Add at least 2 teams.";
+  const size = sel === "auto" ? Math.max(4, 2 ** Math.ceil(Math.log2(teams.length))) : +sel;
+  if (size > 32) return $("err").textContent = "Up to 32 teams fit on screen.";
+  if (teams.length > size) return $("err").textContent = `That is ${teams.length} teams. Pick a bigger bracket.`;
+  newState(size, $("pair").value === "seed" ? seedOrder(size).map(q => teams[q - 1] || null) : teams); $("setup").close(); render(); };
+$("reveal").onclick = reveal; $("undo").onclick = undo;
+const present = () => document.body.classList.toggle("present");
+const full = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} };
+$("presentBtn").onclick = present;
+document.addEventListener("keydown", e => {
+  if ($("setup").open || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target.tagName)) return;
+  if (e.key === " " || e.key === "Enter" || e.key === "ArrowRight") { e.preventDefault(); reveal(); }
+  else if (e.key === "p" || e.key === "P") present();
+  else if (e.key === "f" || e.key === "F") full();
+  else if (e.key === "Escape") document.body.classList.remove("present"); });
+addEventListener("resize", () => { fitCanvas(); if (st) layout(); });
+
+scenery(); fitCanvas(); srcInfo();
+if (load()) render(); else { newState(8, parse(SAMPLE)); render(); $("txt").value = SAMPLE; openSetup(); }
+window.__t = { get st() { return st; }, pick, reveal, undo, render };   // handy for testing in the console
+})();
+</script>
+</body>
+</html>
