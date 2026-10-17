@@ -68,7 +68,7 @@ body:not(.present) .t.can{cursor:pointer}
 body:not(.present) .t.can:hover{background:rgba(34,216,194,.16)}
 body:not(.present) .t.pick{background:rgba(112,163,52,.35)}
 body:not(.present) .t.pick::after{content:"✓";margin-left:auto;color:var(--yellow)}
-#fx{position:fixed;inset:0;z-index:50;pointer-events:none}
+#fx{position:fixed;left:0;top:0;width:100%;height:100%;z-index:50;pointer-events:none}
 #banner{position:fixed;left:0;right:0;top:9%;text-align:center;z-index:60;pointer-events:none;opacity:0;
   font-size:clamp(1.8rem,6vw,4rem);color:var(--yellow);text-shadow:0 0 10px var(--teal),0 0 40px var(--teal),0 0 70px var(--purple),4px 4px 0 #000}
 #banner.on{animation:ban 2.6s ease-out}
@@ -258,25 +258,29 @@ function glow(targets, done) {
   const finish = () => { if (fin) return; fin = true; cancelAnimationFrame(raf); ps = []; pend = [];
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height); targets.forEach(light); done(); };
   if (!targets.length || matchMedia("(prefers-reduced-motion: reduce)").matches) { targets.forEach(light); setTimeout(finish, 900); return; }
-  const now = performance.now(), W = innerWidth, H = innerHeight; let end = 0;
-  targets.forEach((el, i) => { const r = el.getBoundingClientRect(), tx = r.left + r.width / 2, ty = r.top + r.height / 2;
+  const now = performance.now(); let end = 0;
+  targets.forEach((el, i) => { const r = el.getBoundingClientRect();
     for (let n = 0; n < 8; n++) { const sd = Math.random(), st0 = now + 500 + i * 200 + R(0, 350), dur = R(1300, 2100), hover = 900;
-      ps.push({ k: "ff", x0: sd < .7 ? R(0, W) : sd < .85 ? -20 : W + 20, y0: sd < .7 ? H + R(0, 40) : R(H * .3, H),
-        tx: tx + R(-r.width * .3, r.width * .3), ty: ty + R(-r.height * .3, r.height * .3), st: st0, dur, hover,
+      ps.push({ k: "ff", fx: sd < .7 ? Math.random() : sd < .85 ? -.02 : 1.02, fy: sd < .7 ? 1 + R(0, .05) : R(.3, 1),
+        jx: R(-r.width * .3, r.width * .3), jy: R(-r.height * .3, r.height * .3), st: st0, dur, hover,
         col: COL[(i + n) % 5], sz: R(2.2, 4.2), ph: R(0, 6.28), amp: R(20, 70), el, lead: n === 0 });
       end = Math.max(end, st0 + dur + hover - now); } });
   const tick = t => {
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H); cx.globalCompositeOperation = "lighter";
+    const W = innerWidth, H = innerHeight, cache = new Map();
+    const where = el => { let c = cache.get(el); if (!c) { const r = el.getBoundingClientRect(); c = [r.left + r.width / 2, r.top + r.height / 2]; cache.set(el, c); } return c; };
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height);
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.globalCompositeOperation = "lighter";
     ps = ps.filter(p => {
       if (p.k === "sp") { const u = (t - p.t0) / p.life; if (u >= 1) return false, 0; const d = u * p.life / 1000;
         dot(p.x + p.vx * d * (1 - u * .5), p.y + p.vy * d * (1 - u * .5) + 30 * d * d, p.sz * (1 - u * .5), p.col, 1 - u); return true; }
       const u = (t - p.st) / p.dur; if (u < 0) return true;
+      const c = where(p.el), tx = c[0] + p.jx, ty = c[1] + p.jy, x0 = p.fx * W, y0 = p.fy * H;
       if (u < 1) { const e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
-        dot(p.x0 + (p.tx - p.x0) * e + Math.sin(u * 9 + p.ph) * p.amp * (1 - u), p.y0 + (p.ty - p.y0) * e + Math.cos(u * 7 + p.ph) * p.amp * .6 * (1 - u),
+        dot(x0 + (tx - x0) * e + Math.sin(u * 9 + p.ph) * p.amp * (1 - u), y0 + (ty - y0) * e + Math.cos(u * 7 + p.ph) * p.amp * .6 * (1 - u),
             p.sz * (1 + .4 * Math.sin(u * 30 + p.ph)), p.col, 1); return true; }
-      if (!p.lit && p.lead) { p.lit = true; light(p.el); burst(p.tx, p.ty); }
+      if (!p.lit && p.lead) { p.lit = true; light(p.el); burst(tx, ty); }
       const v = (t - p.st - p.dur) / p.hover; if (v >= 1) return false; const a = v * 8 + p.ph;
-      dot(p.tx + Math.cos(a) * 10 * (1 - v), p.ty + Math.sin(a) * 8 * (1 - v), p.sz, p.col, 1 - v); return true; });
+      dot(tx + Math.cos(a) * 10 * (1 - v), ty + Math.sin(a) * 8 * (1 - v), p.sz, p.col, 1 - v); return true; });
     ps = ps.concat(pend); pend = []; cx.globalAlpha = 1;
     if (ps.length) raf = requestAnimationFrame(tick); else finish(); };
   raf = requestAnimationFrame(tick); setTimeout(finish, end + 2500);
