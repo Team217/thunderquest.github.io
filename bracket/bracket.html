@@ -12,6 +12,7 @@
   --font:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
 }
 *{box-sizing:border-box}
+:root{--spd:1}   /* animation speed, set from SPEED in the script */
 html,body{height:100%}
 body{margin:0;font-family:var(--font);color:#fff;overflow:hidden;display:flex;flex-direction:column;
   background:radial-gradient(900px 500px at 12% 0%,rgba(34,216,194,.28),transparent 60%),
@@ -31,9 +32,15 @@ h1{margin:0;font-size:clamp(1.3rem,3vw,2.1rem);color:var(--yellow);text-shadow:0
 .btn{font:inherit;cursor:pointer;padding:10px 16px;border-radius:999px;border:3px solid var(--green);background:#000;color:var(--light-green)}
 .btn:hover:not(:disabled){border-color:var(--teal);box-shadow:0 0 12px var(--teal)}
 .btn.pri{background:var(--yellow);color:#000;border-color:#000;box-shadow:0 0 14px rgba(240,233,115,.6)}
+.tog{display:inline-flex;align-items:center;gap:6px;color:var(--light-green);font-size:.85rem;cursor:pointer;padding:0 4px}
 .btn:disabled{opacity:.4;cursor:default;box-shadow:none}
-body.present .ctl,body.present .hint{display:none}
-.hint{position:fixed;right:14px;bottom:8px;z-index:3;font-size:.7rem;color:rgba(198,222,148,.8)}
+body.present .ctl,body.present #keys{display:none}
+#keys{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:0 18px 2px;padding:7px 14px;border-radius:14px;
+  background:rgba(0,14,6,.6);border:2px solid rgba(112,163,52,.55);font-size:.82rem;color:var(--light-green)}
+#keys .kt{color:var(--yellow);letter-spacing:.06em;text-transform:uppercase;font-size:.72rem}
+#keys .k{white-space:nowrap}
+kbd{display:inline-block;min-width:1.6em;text-align:center;padding:1px 7px;margin-right:2px;border-radius:7px;border:2px solid var(--green);border-bottom-width:3px;
+  background:#000;color:var(--yellow);font:inherit;font-size:.8rem}
 #stage{position:relative;z-index:1;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px 12px 30px}
 #fit{position:relative}
 #bracket{position:absolute;left:0;top:0;width:max-content;transform-origin:0 0}
@@ -71,8 +78,30 @@ body:not(.present) .t.pick::after{content:"✓";margin-left:auto;color:var(--yel
 #fx{position:fixed;left:0;top:0;width:100%;height:100%;z-index:50;pointer-events:none}
 #banner{position:fixed;left:0;right:0;top:9%;text-align:center;z-index:60;pointer-events:none;opacity:0;
   font-size:clamp(1.8rem,6vw,4rem);color:var(--yellow);text-shadow:0 0 10px var(--teal),0 0 40px var(--teal),0 0 70px var(--purple),4px 4px 0 #000}
-#banner.on{animation:ban 2.6s ease-out}
+#banner.on{animation:ban calc(2.6s / var(--spd)) ease-out}
 @keyframes ban{0%{opacity:0;transform:scale(.7);filter:blur(12px)}20%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1}100%{opacity:0;transform:scale(1.12)}}
+#champ,#adv{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;cursor:pointer;
+  background:radial-gradient(closest-side at 50% 50%,rgba(34,216,194,.20),rgba(0,10,5,.9) 85%),rgba(0,10,5,.78);backdrop-filter:blur(3px)}
+#champ.on,#adv.on{display:flex;animation:fadein .9s ease-out}
+@keyframes fadein{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}}
+.cTitle{font-size:clamp(1.3rem,4.2vw,3.2rem);color:var(--light-green);letter-spacing:.05em;text-shadow:0 0 10px var(--teal),0 0 30px var(--teal),3px 3px 0 #000;animation:rise calc(.9s / var(--spd)) calc(.3s / var(--spd)) ease-out both}
+#cNum{color:var(--yellow);line-height:1.05;margin:.08em 0;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 14px var(--yellow),0 0 50px var(--teal),0 0 110px var(--purple),6px 6px 0 #000;animation:cbloom calc(1.6s / var(--spd)) calc(.6s / var(--spd)) ease-out both,cpulse 2.8s calc(2.2s / var(--spd)) ease-in-out infinite}
+@keyframes cbloom{0%{opacity:0;filter:blur(26px);transform:scale(.35)}60%{opacity:1;filter:blur(0);transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+@keyframes cpulse{50%{filter:brightness(1.3) drop-shadow(0 0 22px var(--teal))}}
+#cName{font-size:clamp(1.5rem,5vw,4rem);color:#fff;max-width:92vw;overflow-wrap:anywhere;text-shadow:0 0 14px var(--purple),3px 3px 0 #000;animation:rise calc(1s / var(--spd)) calc(1.4s / var(--spd)) ease-out both}
+.cHint{position:absolute;bottom:14px;font-size:.8rem;color:rgba(198,222,148,.75)}
+#adv .cHint{bottom:10px}
+.aTop{font-size:clamp(1rem,2.4vw,1.8rem);color:var(--light-green);letter-spacing:.12em;text-transform:uppercase;text-shadow:0 0 12px var(--teal);animation:rise calc(.8s / var(--spd)) calc(.2s / var(--spd)) ease-out both}
+.aHead{font-size:clamp(1.8rem,5.5vw,4.2rem);color:var(--yellow);line-height:1.1;text-shadow:0 0 10px var(--yellow),0 0 34px var(--teal),0 0 70px var(--purple),4px 4px 0 #000;animation:rise calc(.9s / var(--spd)) calc(.4s / var(--spd)) ease-out both}
+.aSub{color:var(--light-green);font-size:clamp(.9rem,1.8vw,1.3rem);margin:4px 0 14px;animation:rise calc(.9s / var(--spd)) calc(.6s / var(--spd)) ease-out both}
+#aGrid{display:grid;gap:14px;justify-content:center}
+.acard{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:20px;border:4px solid var(--c);
+  background:rgba(0,14,6,.8);box-shadow:0 5px 0 #000,0 0 24px var(--c);padding:6px;overflow:hidden;animation:cbloom calc(1.1s / var(--spd)) var(--d,0s) ease-out both}
+.anum{color:var(--yellow);line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 12px var(--yellow),0 0 34px var(--teal),3px 3px 0 #000}
+.anm{color:#fff;margin-top:.25em;overflow-wrap:anywhere;line-height:1.15;text-shadow:0 0 8px var(--purple)}
+@media (prefers-reduced-motion:reduce){#champ *,#champ.on,#adv *,#adv.on{animation:none!important}}
 dialog{background:#10261a;color:#fff;border:3px solid var(--green);border-radius:20px;padding:20px;width:min(560px,92vw);font-family:var(--font)}
 dialog::backdrop{background:rgba(0,0,0,.72)}
 dialog h2{margin:0 0 8px;color:var(--yellow)}
@@ -98,13 +127,25 @@ textarea{height:210px;resize:vertical}
     <button class="btn" id="setupBtn">Setup</button>
     <button class="btn" id="undo">↩ Undo reveal</button>
     <button class="btn pri" id="reveal">Reveal</button>
+    <button class="btn" id="celebrate">🎆 Champion screen</button>
+    <label class="tog"><input type="checkbox" id="advAuto" checked> Auto-show advancing teams</label>
     <button class="btn" id="presentBtn">Present</button>
   </div>
 </header>
+<div id="keys">
+  <span class="kt">Shortcuts</span>
+  <span class="k"><kbd>Space</kbd> <kbd>Enter</kbd> <kbd>→</kbd> Reveal next stage</span>
+  <span class="k"><kbd>C</kbd> <kbd>A</kbd> Big screen (advancing teams / champion)</span>
+  <span class="k"><kbd>P</kbd> Presentation mode</span>
+  <span class="k"><kbd>F</kbd> Fullscreen</span>
+  <span class="k"><kbd>Esc</kbd> Close big screen / exit presentation</span>
+  <span class="k">Click a team = pick the winner</span>
+</div>
 <div id="stage"><div id="fit"><div id="bracket"><svg id="vines"></svg><div class="cols" id="cols"></div></div></div></div>
 <canvas id="fx"></canvas>
 <div id="banner"></div>
-<div class="hint">Space = reveal · P = present · F = fullscreen · Esc = exit</div>
+<div id="adv"><div id="advHead"><div class="aTop">ThunderQuest 2026</div><div class="aHead" id="aHead"></div><div class="aSub" id="aSub"></div></div><div id="aGrid"></div><div class="cHint">Click anywhere or press Esc to close</div></div>
+<div id="champ"><div class="cTitle">🏆 ThunderQuest 2026 Champion 🏆</div><div id="cNum"></div><div id="cName"></div><div class="cHint">Click anywhere or press Esc to close</div></div>
 <div class="legal">FIRST® LEGO® League and BIOGLOW™ are jointly held trademarks of FIRST and the LEGO Group. ©2026 FIRST and the LEGO Group. All rights reserved.</div>
 
 <dialog id="setup">
@@ -142,6 +183,9 @@ const COL = ["#22D8C2","#D59CD6","#F0E973","#C6DE94","#70A334"];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const SAMPLE = ["3549 Robotic Ruins","3649 The Gold Miners","16821 Robotic Knighthawks","17791 Artifact Maniacs",
   "17981 Techno Bananas","22287 Morgan Elementary Sharks","23817 Astro Knighthawks","25341 Techno Tie-Dye Tater Tots"].join("\n");
+const SPEED = 1;            // overall reveal speed: 1 = normal, 2 = twice as fast
+const TAKEOVER_DELAY = 800; // ms to wait after the bracket lights up before the big screen opens
+document.documentElement.style.setProperty("--spd", SPEED);
 let st = null, S = 0, busy = false, opt = {};
 
 /* ---------- scenery (all drawn inline, no images) ---------- */
@@ -223,6 +267,8 @@ function ui() {
     b.textContent = `✨ Reveal ${s + 1 === S ? "the champion" : nameOf(s + 1) + " teams"} (${done}/${nM(s)})`;
     b.disabled = busy || done < nM(s); }
   $("undo").disabled = busy || st.revealed === 0;
+  $("celebrate").textContent = st.revealed >= S ? "🎆 Champion screen" : "🌟 Advancing teams";
+  $("celebrate").disabled = busy || st.revealed < 1;
 }
 
 /* ---------- layout: vines + fit to window ---------- */
@@ -252,15 +298,16 @@ function dot(x, y, r, c, a) { const g = cx.createRadialGradient(x, y, 0, x, y, r
 function light(el) { if (el.classList.contains("lit")) return; el.classList.remove("arr"); el.classList.add("lit", "shown");
   const v = el.dataset.vine && $(el.dataset.vine); if (v) v.classList.add("lit"); }
 function burst(x, y) { for (let i = 0; i < 20; i++) { const a = R(0, 6.283), sp = R(40, 220);
-  pend.push({ k: "sp", x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, col: COL[i % 5], t0: performance.now(), life: R(700, 1200), sz: R(1.5, 3.5) }); } }
+  pend.push({ k: "sp", x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, col: COL[i % 5], t0: performance.now(), life: R(700, 1200) / SPEED, sz: R(1.5, 3.5) }); } }
 function glow(targets, done) {
   let fin = false;
   const finish = () => { if (fin) return; fin = true; cancelAnimationFrame(raf); ps = []; pend = [];
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height); targets.forEach(light); done(); };
   if (!targets.length || matchMedia("(prefers-reduced-motion: reduce)").matches) { targets.forEach(light); setTimeout(finish, 900); return; }
   const now = performance.now(); let end = 0;
+  const step = Math.min(200, 1600 / targets.length);   // keep big stages from dragging on
   targets.forEach((el, i) => { const r = el.getBoundingClientRect();
-    for (let n = 0; n < 8; n++) { const sd = Math.random(), st0 = now + 500 + i * 200 + R(0, 350), dur = R(1300, 2100), hover = 900;
+    for (let n = 0; n < 8; n++) { const sd = Math.random(), st0 = now + (500 + i * step + R(0, 350)) / SPEED, dur = R(1300, 2100) / SPEED, hover = 900 / SPEED;
       ps.push({ k: "ff", fx: sd < .7 ? Math.random() : sd < .85 ? -.02 : 1.02, fy: sd < .7 ? 1 + R(0, .05) : R(.3, 1),
         jx: R(-r.width * .3, r.width * .3), jy: R(-r.height * .3, r.height * .3), st: st0, dur, hover,
         col: COL[(i + n) % 5], sz: R(2.2, 4.2), ph: R(0, 6.28), amp: R(20, 70), el, lead: n === 0 });
@@ -292,9 +339,76 @@ function reveal() {
   if (busy || st.revealed >= S) return; const s = st.revealed; if (!complete(s)) return;
   busy = true; st.revealed = s + 1; save(); opt = { arriving: s + 1 }; render();
   banner(s + 1 === S ? "🏆 We have a champion!" : `${nameOf(s + 1)} bound!`);
-  glow([...document.querySelectorAll(".t.arr")], () => { busy = false; opt = {}; render(); });
+  glow([...document.querySelectorAll(".t.arr")], () => { busy = false; opt = {}; render();
+    if (s + 1 === S) setTimeout(() => { if (st.revealed >= S && !busy) celebrate(); }, TAKEOVER_DELAY);
+    else if (advAuto) setTimeout(() => { if (st.revealed === s + 1 && !busy && !anyOpen()) showAdvancing(s); }, TAKEOVER_DELAY); });
 }
-function undo() { if (busy || st.revealed === 0) return; st.revealed--;
+/* ---------- champion celebration: big centre-stage reveal + fireworks ---------- */
+let fwOn = false, fwRaf = 0, fp = [], pendF = [], nextL = 0, lastT = 0, fwCalm = false;
+const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const pickCol = () => COL[Math.floor(R(0, 5))];
+function spark(x, y, a, sp, col, life, g, drag, sz) { pendF.push({ k: "s", x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, col, life, max: life, g, drag, sz }); }
+function explode(x, y) {
+  const c1 = pickCol(), c2 = Math.random() < .5 ? "#fff" : pickCol(), type = Math.floor(R(0, 3));
+  if (type === 0) for (let i = 0; i < 80; i++) spark(x, y, R(0, 6.283), R(60, 280), i % 3 ? c1 : c2, R(1.1, 1.8), 120, .985, R(1.4, 2.4));
+  else if (type === 1) for (let i = 0; i < 56; i++) spark(x, y, i / 56 * 6.283, 230, i % 2 ? c1 : c2, R(1.2, 1.6), 80, .978, 2.2);
+  else for (let i = 0; i < 70; i++) spark(x, y, R(0, 6.283), R(50, 200), "#F0E973", R(1.8, 2.8), 160, .97, R(1.4, 2.2));
+}
+function launch() { const W = innerWidth, H = innerHeight;
+  fp.push({ k: "r", x: R(W * .1, W * .9), y: H + 10, vx: R(-30, 30), vy: -R(H * .85, H * 1.15), ty: R(H * .1, H * .5) }); }
+function fwTick(t) {
+  if (!fwOn) return;
+  const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
+  cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height);
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.globalCompositeOperation = "lighter";
+  if (t >= nextL) { launch(); if (!fwCalm && Math.random() < .35) launch(); nextL = t + (fwCalm ? R(900, 1500) : R(450, 900)); }
+  fp = fp.filter(p => {
+    if (p.k === "r") { p.x += p.vx * dt; p.y += p.vy * dt;
+      if (Math.random() < .8) pendF.push({ k: "s", x: p.x, y: p.y, vx: R(-15, 15), vy: R(10, 40), col: "#F0E973", life: .45, max: .45, g: 0, drag: 1, sz: 1.3 });
+      dot(p.x, p.y, 2.4, "#fff", 1);
+      if (p.y <= p.ty) { explode(p.x, p.y); return false; } return true; }
+    p.life -= dt; if (p.life <= 0) return false;
+    p.vx *= Math.pow(p.drag, dt * 60); p.vy = p.vy * Math.pow(p.drag, dt * 60) + p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    const f = p.life / p.max; dot(p.x, p.y, p.sz * (.4 + .6 * f), p.col, Math.min(1, f * 1.6)); return true; });
+  fp = fp.concat(pendF).slice(-1000); pendF = []; cx.globalAlpha = 1;
+  fwRaf = requestAnimationFrame(fwTick);
+}
+function fwStart(calm) { if (fwOn) return; fwCalm = !!calm; fwOn = true; fp = []; pendF = []; lastT = performance.now(); nextL = lastT + 900;
+  for (let i = 0; i < 3; i++) setTimeout(() => { if (fwOn) launch(); }, 500 + i * 350);
+  fwRaf = requestAnimationFrame(fwTick); }
+function fwStop() { fwOn = false; cancelAnimationFrame(fwRaf); fp = []; cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height); }
+const champOpen = () => $("champ").classList.contains("on");
+const advOpen = () => $("adv").classList.contains("on");
+const anyOpen = () => champOpen() || advOpen();
+let advAuto = true; try { advAuto = localStorage.getItem("tq-adv") !== "0"; } catch (e) {}
+$("advAuto").checked = advAuto;
+$("advAuto").onchange = e => { advAuto = e.target.checked; try { localStorage.setItem("tq-adv", advAuto ? "1" : "0"); } catch (err) {} };
+function advTeams(s) { const out = []; for (let m = 0; m < nM(s); m++) { const w = widx(s, m); if (w !== null && w >= 0) { const t = T(s, m, w); if (t) out.push(t); } } return out; }
+function sizeAdv() {
+  const g = $("aGrid"), n = g.children.length; if (!n) return;
+  const maxLen = Math.max(...[...g.children].map(c => c.firstChild.textContent.length));
+  const W = Math.min(1250, innerWidth * .94), H = Math.max(120, innerHeight - $("advHead").offsetHeight - 90), gap = 14;
+  let best = null;
+  for (let c = 1; c <= Math.min(n, 8); c++) { const rows = Math.ceil(n / c), cw = (W - gap * (c - 1)) / c, ch = Math.min((H - gap * (rows - 1)) / rows, cw * .95);
+    const num = Math.min(ch * .46, cw * .9 / (maxLen * .62)); if (!best || num > best.num + .5) best = { c, cw, ch, num }; }
+  g.style.gridTemplateColumns = `repeat(${best.c}, ${best.cw}px)`;
+  [...g.children].forEach(el => { el.style.height = best.ch + "px"; el.children[0].style.fontSize = best.num + "px";
+    el.children[1].style.fontSize = Math.max(11, Math.min(best.ch * .14, best.cw * .085)) + "px"; });
+}
+function showAdvancing(s) { const ts = advTeams(s); if (!ts.length) return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  closeChamp(); $("aHead").textContent = `${nameOf(s + 1)} bound!`; $("aSub").textContent = `${ts.length} team${ts.length > 1 ? "s" : ""} moving on`;
+  $("aGrid").innerHTML = ts.map((t, i) => `<div class="acard" style="--d:${((.8 + i * Math.min(.28, 2.2 / ts.length)) / SPEED).toFixed(2)}s;--c:${COL[i % 5]}"><div class="anum">${esc(t.num)}</div><div class="anm">${esc(t.name)}</div></div>`).join("");
+  $("adv").classList.add("on"); sizeAdv(); void $("adv").offsetWidth; if (!reduced()) fwStart(true); }
+function showScreen() { if (st.revealed >= S) celebrate(); else if (st.revealed >= 1) showAdvancing(st.revealed - 1); }
+function sizeChamp() { const len = String($("cNum").textContent).length || 1;
+  $("cNum").style.fontSize = Math.max(40, Math.min(innerHeight * .36, innerWidth * .9 / (len * .62))) + "px"; }
+function celebrate() { const t = champ(); if (!t || busy || st.revealed < S) return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  closeChamp(); $("cNum").textContent = t.num; $("cName").textContent = t.name; sizeChamp();
+  void $("champ").offsetWidth; $("champ").classList.add("on"); if (!reduced()) fwStart(); }
+function closeChamp() { $("champ").classList.remove("on"); $("adv").classList.remove("on"); fwStop(); }
+function undo() { if (busy || st.revealed === 0) return; closeChamp(); st.revealed--;
   for (let s = st.revealed + 1; s < S; s++) st.picks[s].fill(null); save(); render(); }
 function seedOrder(n) { let o = [1, 2]; while (o.length < n) { const m = o.length * 2; o = o.flatMap(x => [x, m + 1 - x]); } return o; }
 let ranked = null;
@@ -326,17 +440,20 @@ $("go").onclick = () => { const teams = parse($("txt").value), sel = $("size").v
   if (size > 32) return $("err").textContent = "Up to 32 teams fit on screen.";
   if (teams.length > size) return $("err").textContent = `That is ${teams.length} teams. Pick a bigger bracket.`;
   newState(size, $("pair").value === "seed" ? seedOrder(size).map(q => teams[q - 1] || null) : teams); $("setup").close(); render(); };
-$("reveal").onclick = reveal; $("undo").onclick = undo;
-const present = () => document.body.classList.toggle("present");
+$("reveal").onclick = reveal; $("undo").onclick = undo; $("celebrate").onclick = showScreen; $("champ").onclick = closeChamp; $("adv").onclick = closeChamp;
+const refit = () => requestAnimationFrame(() => { if (st) layout(); });
+const present = () => { document.body.classList.toggle("present"); refit(); };
 const full = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} };
 $("presentBtn").onclick = present;
 document.addEventListener("keydown", e => {
+  if (anyOpen()) { if ([" ", "Enter", "Escape", "ArrowRight"].includes(e.key)) { e.preventDefault(); closeChamp(); } return; }
   if ($("setup").open || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target.tagName)) return;
   if (e.key === " " || e.key === "Enter" || e.key === "ArrowRight") { e.preventDefault(); reveal(); }
+  else if (e.key === "c" || e.key === "C" || e.key === "a" || e.key === "A") showScreen();
   else if (e.key === "p" || e.key === "P") present();
   else if (e.key === "f" || e.key === "F") full();
-  else if (e.key === "Escape") document.body.classList.remove("present"); });
-addEventListener("resize", () => { fitCanvas(); if (st) layout(); });
+  else if (e.key === "Escape") { document.body.classList.remove("present"); refit(); } });
+addEventListener("resize", () => { fitCanvas(); if (st) layout(); if (champOpen()) sizeChamp(); if (advOpen()) sizeAdv(); });
 
 scenery(); fitCanvas(); srcInfo();
 if (load()) render(); else { newState(8, parse(SAMPLE)); render(); $("txt").value = SAMPLE; openSetup(); }
