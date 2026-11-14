@@ -4,9 +4,9 @@
 Only the "Team Database" tab is read. Within it, columns are found by header
 text ("Team #", "Team Name", "Round 1"...), not by position.
 The Raw Performance and GP columns are ignored: each team is ranked by its
-highest round score. Columns are matched by header text, so inserting/moving columns is fine.
+highest round score (ties: next-highest score, then lower team number). Columns are matched by header text, so inserting/moving columns is fine.
 """
-import datetime, json, os, re, shutil, sys, warnings
+import csv, datetime, io, json, os, re, shutil, sys, warnings
 from pathlib import Path
 from openpyxl import load_workbook
 
@@ -62,6 +62,29 @@ def read_teams(ws, layout):
     return n, teams
 
 
+def write_csv(teams, n, path):
+    """Save every team's posted scores to a CSV (data/scores.csv).
+
+    The file has no timestamps, so if the scores have not changed the file is byte-for-byte the
+    same and git sees no difference.
+    """
+    def safe(v):  # stop spreadsheet apps treating text like =... as a formula
+        return "'" + v if isinstance(v, str) and v[:1] in "=+-@" else v
+
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\r\n")
+    w.writerow(["Rank", "Team #", "Team Name"] + [f"Round {i}" for i in range(1, n + 1)] + ["Best Score"])
+    for t in sorted(teams, key=lambda t: (t["rank"] is None, t["rank"] or 0, t["num"])):
+        w.writerow([t["rank"] if t["rank"] is not None else "", t["num"], safe(t["name"])]
+                   + ["" if x is None else x for x in t["rounds"]] + ["" if t["best"] is None else t["best"]])
+    try:
+        # utf-8-sig adds a BOM so Excel reads accents correctly
+        path.write_text(buf.getvalue(), encoding="utf-8-sig", newline="")
+        print(f"Wrote {path.relative_to(ROOT)}")
+    except OSError as e:  # e.g. the CSV is open in Excel on Windows
+        print(f"WARNING: could not write {path.name} ({e}). Close it and build again.")
+
+
 def main():
     files = [p for p in sorted(DATA.glob("*.xls[xm]")) if not p.name.startswith("~$")]
     if not files:
@@ -81,11 +104,19 @@ def main():
         sys.exit("Found headers but no teams. If the cells are formulas, open the workbook "
                  "in Excel and save it so results are stored.")
 
-    # Competition ranking (ties share a rank: 1,1,3). A score of 0 counts and gets a rank;
-    # only teams with no scores entered at all stay unranked.
+    # Ranking: highest round score first. Ties are broken by the next-highest score, then the
+    # next, and so on (rounds with no score count as 0). If every score is identical, the lower
+    # team number ranks higher, so ranks are always unique (1, 2, 3...).
+    # Teams with no scores entered at all stay unranked; a score of 0 still counts and is ranked.
+    def sort_key(t):
+        scores = sorted((x for x in t["rounds"] if x is not None), reverse=True)
+        scores += [0] * (n - len(scores))
+        return ([-x for x in scores], t["num"])
+
     for t in teams:
-        t["rank"] = (1 + sum(1 for o in teams if o["best"] is not None and o["best"] > t["best"])
-                     if t["best"] is not None else None)
+        t["rank"] = None
+    for i, t in enumerate(sorted((t for t in teams if t["best"] is not None), key=sort_key), start=1):
+        t["rank"] = i
 
     payload = {
         "updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
@@ -98,6 +129,7 @@ def main():
     (OUT / "data.json").write_text(blob, encoding="utf-8")
     idx = OUT / "index.html"
     idx.write_text(idx.read_text(encoding="utf-8").replace("/*__DATA__*/null", blob), encoding="utf-8")
+    write_csv(teams, n, DATA / "scores.csv")
     print(f"{path.name} [{title}]: {len(teams)} teams, {n} rounds -> {OUT}")
 
 
